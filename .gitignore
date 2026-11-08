@@ -1,0 +1,81 @@
+# Data and outputs (the LANL files are ~8 GB compressed; run_all.sh rebuilds results)
+data/
+results/
+*.gz
+*.bz2
+*.npz
+*.npy
+*.csv
+*.parquet
+*.json
+*.log
+
+# Model checkpoints
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+checkpoints/
+runs/
+wandb/
+lightning_logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Environments
+.env
+.envrc
+.venv/
+venv/
+env/
+ENV/
+.conda/
+conda-env/
+
+# Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Paper and drafts
+*.pdf
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.toc
+*.md
+!README.md
+!DATASET.md
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+nohup.out
