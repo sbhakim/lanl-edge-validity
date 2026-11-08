@@ -1,0 +1,77 @@
+AUDIT PROTOCOL, ROUND 1
+
+Frozen 2026-11-06, before any of the analyses below were run. Any later deviation is listed under
+"Deviations" at the end with its reason. Nothing here is selected by test performance.
+
+A. Label audit (raw data)
+-------------------------
+A1. Red-team file: rows, unique full rows (t,user,src,dst), unique (t,src,dst) tuples, per-source counts.
+A2. Match every red-team row to auth.txt on (t, src, dst) exactly as src/prep_lanl.py does. Report: rows with
+    0 / >=1 matching auth events; auth type, logon type, orientation, success of matched events; whether the
+    red-team user equals the matched event's source user.
+
+B. Preprocessing variants (counts only; no model is retrained)
+--------------------------------------------------------------
+Unit: a deduplicated directed edge (key, src, dst) inside a time bucket; malicious if >=1 event in it matches
+a red-team tuple. Test period = buckets starting at or after t=150,885 (first red-team second).
+Pre-specified variants (all computer-to-computer, names starting with 'C', after stripping '$'):
+ B0  all events, 30-min, no self-loops                 (= paper pipeline)
+ B1  B0 + NTLM only                                     (Euler public loader)
+ B2  B0 + orientation LogOn only
+ B3  B0 + success only
+ B4  B0 + LogOn and success
+ B5  B0 excluding machine ($) and ANONYMOUS source users
+ B6  B4 + B5
+ B7  B0 including self-loops
+ B8  B0 with 1-hour buckets
+ B9  B0 with 1-minute buckets
+ B10 event level (no deduplication), C-to-C, no self-loops
+ B11 user-level edges: (source user, destination computer), 30-min
+Reported for each: total edges, test edges, malicious edges, malicious edges per labelled source host,
+C17693 share, and effective number of labelled source hosts 1/sum_h p_h^2.
+45M/518 trace: report which, if any, variant comes within 10% of 45M edges AND within 10 of 518 positives.
+We do not search further filters beyond this list.
+
+C. Information-flow (timing) audit
+----------------------------------
+Document, from code, what each predicate and model sees when an edge in window t is scored
+(main GNN, auth model, EncG, observed NTLM share, first access, host age). No new numbers.
+
+D. Workload and host-level metrics (cached scores; seeds 0–4)
+-------------------------------------------------------------
+At the 0.5% FPR threshold (99.5th percentile of sampled benign scores; exclusion of C17693 removes only
+positives, so the threshold is identical in both views):
+ D1 expected benign alerts per test day = FPR-sample count x inverse sampling rate / test days;
+ D2 per labelled host: first malicious window, first detected window, delay, k/n;
+ D3 expected benign alerts raised before each host's first detection (sample count x inverse rate);
+ D4 edge-weighted TPR vs macro host coverage (mean over 4 hosts of 1[k>0]) and macro TPR (mean k/n).
+Distinct-host workload is computed only where full-test scoring is cheap (no-learning scores, main GNN).
+
+E. Pre-specified no-learning diagnostics (single scoring rule each, no tuning)
+------------------------------------------------------------------------------
+ E1 NTLM: edge contains >=1 NTLM event (binary)
+ E2 FirstAccess: edge contains >=1 first-time (account, destination) event (binary)
+ E3 NewEdge: (src,dst) never observed in any earlier 30-min window (binary)
+ E4 FanOut: number of distinct destinations of the source in the same window (count)
+ E5 HostAge: -log(1+hours since source first observed)   (existing)
+ E6 Rule: E1+E2                                           (existing, post hoc)
+All are reported, whatever their results. E1–E4 use only the edge's own window and the past.
+
+F. Rule-weight ablation (cached fit-pair and test scores; seeds 0–4)
+--------------------------------------------------------------------
+ F1 learned R1–R3 unconstrained (existing KnowGraph re-impl.)
+ F2 learned R2–R3 (R1 removed)  (existing)
+ F3 learned R1–R3 with all rule weights constrained >= 0 (projected/bounded fit)
+ F4 learned R2–R3 + R1 fixed at w in {0.5,1,2,4}
+Report fitted weights per seed and TPR@0.5% FPR all / without C17693. No configuration is declared best.
+
+G. Prospective (non-retrospective) evaluation of the main GNN
+-------------------------------------------------------------
+ G1 stress test: frozen detection-trained weights; edges of window t scored with the state after t-1.
+ G2 one-window-ahead model: same architecture, trained to predict window t edges from state after t-1,
+    same negatives, same training windows, early stopping on the same validation rule; seeds 0–4.
+Report AUC, TPR@0.5% all/excluding C17693, per-host k/n for G1 and G2 next to the retrospective model.
+
+Deviations
+----------
+None.

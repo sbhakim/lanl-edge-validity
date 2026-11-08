@@ -1,0 +1,58 @@
+AUDIT PROTOCOL, ROUND 2
+
+Frozen 2026-11-06, after round 1 and before any round-2 analysis was run. Shared definitions are the same as round 1. Strict hits use score > 99.5th percentile of
+sampled benign scores (pooled threshold), and interpolated ROC TPR is always reported alongside.
+
+Corrections to round-1 documentation (no change in numbers)
+-----------------------------------------------------------
+- Test buckets are those containing or after t = 150,885 (integer bucket index ≥ 150,885 // bucket length), as in the model pipeline. Event-level B10 uses event time ≥ 150,885.
+- "Same negatives" (G2) means the same negative-sampling procedure, not the same sampled pairs.
+- "≈7,100 benign alerts/day" is the full 0.5% edge-FPR budget. Each detector's realised workload is reported separately.
+- F4 left the auth-evidence scale unconstrained, and it became negative in 3/5 seeds at R1 ≥ 1. F4 is a sensitivity run, not a clean test of the intended rule. F4b below fixes this.
+
+R2-1 Novelty decomposition (binary scores, same test pairs, no winner chosen)
+-----------------------------------------------------------------------------
+ N1 directed (src,dst) first 30-min window (= round-1 E3 NewEdge)
+ N2 undirected {src,dst} first window
+ N3 source host's first C→C window (either direction)
+Report: interpolated and strict TPR all and excl. C17693, per-host k/n, first-hit delay, realised benign FPR,
+full-table benign edge alerts/day and distinct benign source hosts alerted/day.
+
+R2-2 Budgets and host-exclusion thresholds
+------------------------------------------
+Detectors: Main GNN, EncG, KnowGraph re-impl. (learned MLN), knowledge MLN R1–R4 w=4, Rule, HostAge, N1.
+FPR budgets {0.05, 0.1, 0.5, 1.0}%: strict TPR all / excl. C17693, per-host k, first-hit delay, and estimated benign
+edge alerts before each host's first hit ("never" if none). For each labelled host h: hits on h at 0.5% with
+(i) the pooled threshold and (ii) a threshold from the benign sample with h's own benign source edges removed.
+
+R2-3 EncG same-window burst intervention (frozen EncG weights, 5 seeds; labelled edges only)
+--------------------------------------------------------------------------------------------
+For each of the 525 malicious test edges in window w: control = EncG score on w's graph; intervention = EncG score on w's
+graph with all other malicious edges of w removed (the target edge is removed in both, as EncG always does).
+Both use the same per-pair RNG seed (seed = hash(w, src, dst)) for neighbour sampling. Report the mean score change
+by host and by number of removed edges, and threshold crossings against the original benign 0.5% threshold
+(cached benign scores). Also report agreement of control with cached scores. This is a diagnostic intervention,
+not deployable inference.
+
+R2-4 Paired R1 audit and constrained F4
+---------------------------------------
+Per seed: F1 vs F2 at each configuration's own pooled threshold, threshold crossings by host, and the paired
+TPR difference listed per seed. F4b: R1 fixed at {0.5,1,2,4} with scale_auth ≥ 0. Optimizer success, final
+objective and gradient norm are saved for F1–F4b. No significance test treating seeds as independent intrusions.
+
+R2-5 NewEdge inside the MLN (no refitting, no selection)
+--------------------------------------------------------
+Observed predicate NE = N1 with evidence log-odds ±log(99) (P = 0.99/0.01). Rule R5: NE ⇒ main=Mal with fixed weight
+w5 ∈ {0.5,1,2,4}, added to (a) the frozen fitted KnowGraph re-impl. MLN (seed-specific fitted weights and scales) and
+(b) the knowledge MLN R1–R4 at w=4. Compare with N1 alone and with each MLN without R5: interpolated and strict TPR,
+excl. C17693, per-host k. The full grid is reported.
+
+R2-6 Benign-sample threshold sensitivity
+----------------------------------------
+1,000 bootstrap resamples (seed 0) of the 2 M sampled benign scores. Recompute the 99.5th-percentile threshold,
+strict TPR on the fixed 525 positives, and per-host hits. Report 2.5–97.5 percentile ranges as threshold-sampling
+sensitivity (not intervals for future attacks). Seed 0 for learned detectors; seed-free for no-learning scores.
+
+Deviations
+----------
+None.
