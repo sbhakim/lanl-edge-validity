@@ -23,6 +23,7 @@ run_all.sh  the full pipeline, from raw logs to final numbers
 | `audits/prep_audit.py` | label audit and the twelve edge constructions |
 | `audits/round1.py`, `audits/round2.py` | workload, rule ablations, FPR budgets, new-edge baseline, bootstrap |
 | `audits/prospective.py`, `audits/encg_burst.py` | prospective scoring and the EncG burst intervention |
+| `audits/lanl_report.py` | the recommended reporting checks for any detector's edge scores |
 
 ## Requirements
 
@@ -39,6 +40,8 @@ bash run_all.sh
 ```
 
 The script finishes by checking the recomputed counts: 749 red-team events, 525 malicious and 79,904,287 benign test edges, 504 malicious edges from C17693, and 255,624 rule-fitting pairs. Every script can also be run on its own; its arguments are listed at the top of the file.
+
+To apply the same checks to another detector, save one score per test edge (higher means more anomalous) and run `python audits/lanl_report.py . scores.npy`. It prints per-host detections, results without C17693, AP at the true prevalence, expected benign alerts per day, and the two no-learning baselines for comparison.
 
 ## Citation
 
