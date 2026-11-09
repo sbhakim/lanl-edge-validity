@@ -68,18 +68,20 @@ python audits/lanl_report.py . scores.npy
 
 It prints per-host detections at a strict 0.5% FPR threshold, results with and without C17693, AP at the true prevalence, expected benign alerts per day, and the two no-learning baselines for comparison. It reads `results/` and `data/prep/nodes.npy`, so run `run_all.sh` first.
 
+<!--
 ## Citation
 
 ```bibtex
 @misc{hakim2026neverseen,
   title  = {Never-Seen Edges Rival Knowledge-Enabled Detectors: A Measurement Study of
             Benchmark Validity in {LANL} Lateral-Movement Detection},
-  author = {Hakim, Safayat Bin and Song, Houbing Herbert},
+  author = {Hakim, Safayat Bin and Adil, Muhammad and Song, Houbing Herbert},
   year   = {2026}
 }
 ```
 
 Please also cite the LANL dataset (Kent, 2015); its BibTeX entry is in [DATASET.md](DATASET.md).
+-->
 
 ## License
 
