@@ -38,7 +38,7 @@ The experiments use the public LANL authentication log and red-team file. See [D
 bash run_all.sh
 ```
 
-The script finishes by checking the regenerated counts: 749 red-team events, 525 malicious and 79,904,287 benign test edges, 504 malicious edges from C17693, and 255,624 rule-fitting pairs. Every script can also be run on its own; its arguments are listed at the top of the file.
+The script finishes by checking the recomputed counts: 749 red-team events, 525 malicious and 79,904,287 benign test edges, 504 malicious edges from C17693, and 255,624 rule-fitting pairs. Every script can also be run on its own; its arguments are listed at the top of the file.
 
 ## Citation
 
